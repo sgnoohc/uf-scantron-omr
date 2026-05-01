@@ -1,0 +1,29 @@
+# Student data — never commit (FERPA)
+data/
+testdata/
+*.omr.json
+*.omr.pdf
+*.pdf
+
+# Output artifacts
+output_data/
+annoate_data
+annoate_data/
+annotated_data/
+out.sdf
+_warped.png
+template_overlay.png
+viz/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+*.swp

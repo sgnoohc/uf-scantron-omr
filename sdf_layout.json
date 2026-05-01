@@ -1,0 +1,22 @@
+{
+  "_comment": "SDF layout configuration for flexam. Each entry places one field at a fixed column. Columns are 0-indexed. width = number of characters this field occupies. The output line is padded with spaces to line_width and terminated with CRLF.",
+
+  "line_width": 116,
+  "line_ending": "\r\n",
+  "blank_char": " ",
+  "ambiguous_char": "*",
+  "answer_encoding": {"A": "1", "B": "2", "C": "3", "D": "4", "E": "5"},
+
+  "fields": [
+    {"col":   0, "width": 12, "source": "last_name",     "align": "left",  "pad": " "},
+    {"col":  12, "width":  1, "source": "first_initial",  "align": "left",  "pad": " "},
+    {"col":  13, "width":  1, "source": "middle_initial", "align": "left",  "pad": " "},
+    {"col":  14, "width":  8, "source": "uf_id",          "align": "right", "pad": " "},
+
+    {"col":  30, "width":  5, "source": "answers", "questions": [76,77,78,79,80]},
+    {"col":  35, "width": 10, "source": "answers", "questions": [1,2,3,4,5,6,7,8,9,10]},
+    {"col":  46, "width": 10, "source": "answers", "questions": [11,12,13,14,15,16,17,18,19,20]},
+    {"col":  78, "width": 10, "source": "answers", "questions": [21,22,23,24,25,26,27,28,29,30]},
+    {"col": 111, "width":  5, "source": "answers", "questions": [31,32,33,34,35]}
+  ]
+}
