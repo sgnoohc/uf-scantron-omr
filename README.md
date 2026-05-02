@@ -9,29 +9,48 @@ the JSON to a fixed-width SDF file for flexam.
 
 ## Quick start
 
+### One-shot: directory of raw scanned PDFs → single SDF
+
+The simplest path. Works on raw DRC bulk-scan PDFs (each PDF can be
+multi-page, the OMR page is auto-detected by red-pixel density):
+
 ```bash
-# 1. clone + set up
-git clone https://github.com/<YOUR-USERNAME>/uf-scantron-omr.git
+# 1. clone + install (one-time)
+git clone https://github.com/sgnoohc/uf-scantron-omr.git
 cd uf-scantron-omr
 python3 -m venv .venv && source .venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
-# 2. extract OMR data from a directory of PDFs
-python3 omr.py /path/to/scans/
-#   → writes <stem>.omr.json next to each PDF
-
-# 3. (optional) consolidate to one JSON
-python3 omr.py /path/to/scans/ --out results.json
-
-# 4. (optional) render an annotated PDF showing detected fills + grid
-python3 annotate_omr.py /path/to/scans/ /path/to/annotated.pdf
-
-# 5. (optional) convert JSONs to flexam SDF
-python3 to_sdf.py /path/to/scans/ /path/to/out.sdf
+# 2. PDF directory → flexam-ready SDF (one command)
+python3 pdf_to_sdf.py /path/to/scans/ /path/to/out.sdf
 ```
 
-That's it. Inspect `*.omr.json` to see the decoded fields.
+That's it. The SDF is sorted by LAST_NAME, fixed-width 116 cols/line,
+CRLF terminated, ready for flexam.
+
+Optionally also dump a combined JSON for inspection:
+
+```bash
+python3 pdf_to_sdf.py /path/to/scans/ out.sdf --save-json out.json
+```
+
+### Step-by-step (for QA / inspection)
+
+If you want to spot-check before committing to the SDF, run the steps
+individually:
+
+```bash
+# A. extract per-PDF JSON next to each PDF
+python3 omr.py /path/to/scans/
+
+# B. render an annotated PDF — every page shows detected fills as green
+#    rings on the original scan with a sidebar listing all decoded fields
+python3 annotate_omr.py /path/to/scans/ /path/to/annotated.pdf
+
+# C. fold the JSONs into the flexam SDF
+python3 to_sdf.py /path/to/scans/ /path/to/out.sdf
+```
 
 ---
 
@@ -77,6 +96,29 @@ Alternatives:
 ---
 
 ## CLI reference
+
+### `pdf_to_sdf.py` — one-shot end-to-end pipeline
+
+```
+python3 pdf_to_sdf.py <input_dir> <output.sdf>
+                      [--layout sdf_layout.json]
+                      [--sort last_name|uf_id|file|none]
+                      [--save-json PATH]
+                      [--ext .pdf] [--dpi 300]
+```
+
+| flag | default | meaning |
+|---|---|---|
+| `<input_dir>` | required | directory of scanned PDFs (or single PDF) |
+| `<output.sdf>` | required | path to write the combined SDF |
+| `--layout` | `./sdf_layout.json` | column layout for the SDF |
+| `--sort` | `last_name` | record ordering |
+| `--save-json` | unset | also dump combined JSON to this path |
+| `--ext` | `.pdf` | file extension to scan for |
+| `--dpi` | `300` | rasterization DPI |
+
+Records that fail OMR detection are reported on stderr and skipped from
+the SDF (so the SDF only contains usable rows).
 
 ### `omr.py` — extract OMR data to JSON
 
@@ -233,11 +275,12 @@ form variants.
 
 ```
 omr/
-├── omr.py                # CLI: PDFs → .omr.json
-├── reader.py             # grid reader (read_omr_grid) + legacy template reader
-├── annotate_omr.py       # CLI: PDFs → annotated debug PDF
+├── pdf_to_sdf.py         # CLI: PDF dir → single SDF (one-shot pipeline)
+├── omr.py                # CLI: PDFs → .omr.json (intermediate step)
+├── annotate_omr.py       # CLI: PDFs → annotated debug PDF (QA)
+├── to_sdf.py             # CLI: .omr.json dir → fixed-width SDF
 ├── extract_omr.py        # CLI: pull OMR pages out of multi-page PDFs
-├── to_sdf.py             # CLI: .omr.json → fixed-width SDF
+├── reader.py             # grid reader (read_omr_grid) + legacy template reader
 ├── build_template.py     # legacy template auto-calibration (only needed for --legacy-template)
 ├── utils.py              # PDF rendering, red-density page pick, deskew, stripe fit
 ├── sdf_layout.json       # column layout for SDF export
